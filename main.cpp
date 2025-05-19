@@ -243,9 +243,10 @@ auto create_and_destruct(std::size_t N, int trials) noexcept -> Stats
 int main(int argc, char* argv[])
 {
     // column sizes
-    constexpr auto W1 = 12; // “Size”
-    constexpr auto W2 = 22; // “Container”
-    constexpr auto WM = 25; // each metric column
+    // i just found those out by playing arround
+    constexpr auto W1 = 12;
+    constexpr auto W2 = 22;
+    constexpr auto WM = 25;
 
     const std::vector sizes =
         {1, 10, 100, 1'000, 10'000, 100'000, 1'000'000, 10'000'000, 100'000'000};
