@@ -1,10 +1,12 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
+import argparse
 
-def main():
+
+def plot_file(filename):
     # Load data
-    df = pd.read_csv("results.txt")
+    df = pd.read_csv(filename)
 
     # Available containers in data
     containers = df['Container'].unique()
@@ -14,7 +16,7 @@ def main():
     metrics = [
         ('CreateDestroyMean', 'Create+Destroy'),
         ('IterateMean', 'Iterate'),
-        ('AccessMean', 'Access')
+        ('AccessMean', 'Random Access')
     ]
     ci_cols = [
         'CreateDestroyCI95',
@@ -52,6 +54,19 @@ def main():
     plt.suptitle('static_vector vs vector<unique_ptr>', fontsize=16, y=1.07)
     plt.savefig('benchmark_blog_plot.png', dpi=200, bbox_inches='tight')
     plt.show()
+
+def main():
+    parser = argparse.ArgumentParser(
+        description='Plot benchmark CSV with means and 95% CI bands.'
+    )
+    parser.add_argument(
+        '--filename',
+        help='Path to CSV file containing the data'
+    )
+    args = parser.parse_args()
+
+    plot_file(args.filename)
+
 
 if __name__ == "__main__":
     main()
