@@ -33,7 +33,6 @@ def main():
             mean = subset[metric]
             ci = subset[ci_col]
 
-            # Plot mean with error bands
             ax.plot(sizes, mean, marker='o', label=container, color=colors[i])
             ax.fill_between(sizes,
                             mean - ci,
@@ -50,7 +49,7 @@ def main():
         ax.grid(True, which="both", ls='--', alpha=0.5)
 
     plt.tight_layout()
-    plt.suptitle('Benchmark Results: static_vector vs vector<unique_ptr>', fontsize=16, y=1.07)
+    plt.suptitle('static_vector vs vector<unique_ptr>', fontsize=16, y=1.07)
     plt.savefig('benchmark_blog_plot.png', dpi=200, bbox_inches='tight')
     plt.show()
 
