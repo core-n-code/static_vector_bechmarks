@@ -67,4 +67,4 @@ $ python plot.py --filename results.csv
 The script produces **`benchmark_blog_plot.png`**—a three‑panel log‑log plot with shaded 95 % CIs.
 On my system it looks like this:
 
-![image](./benchmark_blog_plot.png)
+![image](AMD_Ryzen_7_PRO_5850U.png)
