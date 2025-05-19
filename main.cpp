@@ -340,5 +340,4 @@ int main(int argc, char* argv[])
                 vu_a.ci95);
         }
     }
-    return 0;
 }
