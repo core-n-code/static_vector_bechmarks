@@ -14,7 +14,7 @@ For each metric the program reports the **mean** and a **95 % confidence inter
 
 ---
 
-## 1 · Requirements
+## Requirements
 
 | Tool             | Version & Notes                                                                                                                   |
 | ---------------- | --------------------------------------------------------------------------------------------------------------------------------- |
@@ -22,7 +22,7 @@ For each metric the program reports the **mean** and a **95 % confidence inter
 
 ---
 
-## 2 · Building the Benchmark
+## Building the Benchmark
 
 ```bash
 $ g++ -std=c++23 -O3 -march=native -o benchmark main.cpp
@@ -32,7 +32,7 @@ $ g++ -std=c++23 -O3 -march=native -o benchmark main.cpp
 
 ---
 
-## 3 · Running
+## Running
 
 ### Human‑readable table
 
@@ -58,7 +58,7 @@ The program benchmarks the following container sizes (elements):
 
 ---
 
-## 4 · Plotting Results
+## Plotting Results
 
 ```bash
 $ python plot.py --filename results.csv
