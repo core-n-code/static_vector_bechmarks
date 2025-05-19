@@ -1,5 +1,6 @@
 #include <chrono>
 #include <cstring>
+#include <limits>
 #include <memory>
 #include <numeric>
 #include <print>
@@ -8,12 +9,12 @@
 #include <utility>
 #include <vector>
 
-// Prevent the compiler from optimizing away “useless” loads/stores:
+// prevent the compiler from optimizing away “useless” loads/stores:
 template <class T> inline void DoNotOptimize(T const &value) {
   asm volatile("" : : "g"(value) : "memory");
 }
 
-// Dummy type that is neither copyable nor movable
+// dummy type that is neither copyable nor movable
 struct Dummy {
   Dummy() noexcept = default;
   Dummy(Dummy const &) = delete;
@@ -86,8 +87,13 @@ auto clean_cache() {
   constexpr std::size_t bigger_than_cachesize = 17 * 1024 * 1024;
   static auto *p = new std::size_t[bigger_than_cachesize];
 
+  static std::mt19937_64 rng{std::random_device()()};
+  static std::uniform_int_distribution<std::size_t> dist{
+      std::numeric_limits<std::size_t>::min(),
+      std::numeric_limits<std::size_t>::max()};
+
   for (std::size_t i = 0; i < bigger_than_cachesize; i++) {
-    p[i] = rand();
+    p[i] = dist(rng);
   }
 }
 
@@ -159,53 +165,56 @@ template <typename C> auto create_vec(std::size_t N) noexcept -> C {
 }
 
 template <typename C>
-auto time_iterate(std::size_t N, int trials) noexcept -> Stats {
+auto iterate(std::size_t N, int trials) noexcept -> Stats {
 
   auto c = create_vec<C>(N);
 
   return measure(
       [&] {
         for (auto const &x : c) {
-          if constexpr (std::same_as<typename C::value_type, Dummy>)
+          if constexpr (std::same_as<typename C::value_type, Dummy>) {
             DoNotOptimize(x.dummy);
-          else
+          } else {
             DoNotOptimize(x->dummy);
+          }
         }
       },
       trials);
 }
 
-template <typename C>
-auto time_access(std::size_t N, int trials) noexcept -> Stats {
+template <typename C> auto access(std::size_t N, int trials) noexcept -> Stats {
   auto c = create_vec<C>(N);
   auto idx = gen_indices(N);
 
   return measure(
       [&] {
         for (auto i : idx) {
-          if constexpr (std::same_as<typename C::value_type, Dummy>)
+          if constexpr (std::same_as<typename C::value_type, Dummy>) {
             DoNotOptimize(c[i].dummy);
-          else
+          } else {
             DoNotOptimize(c[i]->dummy);
+          }
         }
       },
       trials);
 }
 
 template <typename C>
-auto time_create_and_destruct(std::size_t N, int trials) noexcept -> Stats {
+auto create_and_destruct(std::size_t N, int trials) noexcept -> Stats {
   return measure(
       [&] {
         if constexpr (std::same_as<C, static_vector<Dummy>>) {
           static_vector<Dummy> v(N);
-          for (std::size_t i = 0; i < N; ++i)
+          for (std::size_t i = 0; i < N; ++i) {
             v.emplace_back();
+          }
           DoNotOptimize(v);
         } else {
           std::vector<std::unique_ptr<Dummy>> v;
           v.reserve(N);
-          for (std::size_t i = 0; i < N; ++i)
+          for (std::size_t i = 0; i < N; ++i) {
             v.emplace_back(std::make_unique<Dummy>());
+          }
           DoNotOptimize(v);
         }
       },
@@ -245,17 +254,14 @@ int main(int argc, char *argv[]) {
   }
 
   for (auto N : sizes) {
-    const auto sv_c = time_create_and_destruct<static_vector<Dummy>>(N, trials);
-    const auto sv_i = time_iterate<static_vector<Dummy>>(N, trials);
-    const auto sv_a = time_access<static_vector<Dummy>>(N, trials);
+    const auto sv_c = create_and_destruct<static_vector<Dummy>>(N, trials);
+    const auto sv_i = iterate<static_vector<Dummy>>(N, trials);
+    const auto sv_a = access<static_vector<Dummy>>(N, trials);
 
     const auto vu_c =
-        time_create_and_destruct<std::vector<std::unique_ptr<Dummy>>>(N,
-                                                                      trials);
-    const auto vu_i =
-        time_iterate<std::vector<std::unique_ptr<Dummy>>>(N, trials);
-    const auto vu_a =
-        time_access<std::vector<std::unique_ptr<Dummy>>>(N, trials);
+        create_and_destruct<std::vector<std::unique_ptr<Dummy>>>(N, trials);
+    const auto vu_i = iterate<std::vector<std::unique_ptr<Dummy>>>(N, trials);
+    const auto vu_a = access<std::vector<std::unique_ptr<Dummy>>>(N, trials);
 
     if (csv_output) {
       // Output as CSV
