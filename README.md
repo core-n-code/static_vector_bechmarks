@@ -1,5 +1,7 @@
 # static\_vector vs vector\<unique\_ptr> Benchmark
 
+You can read more about **`static_vector`** [here](https://core-n.de/devblog/static_vector/).
+
 A tiny benchmark suite that compares the performance of a hand‑rolled **`static_vector<T>`** (a fixed‑capacity, contiguous container) against a standard **`std::vector<std::unique_ptr<T>>`** when storing a non‑copyable, non‑movable `Dummy` type.
 
 The benchmark measures three common patterns:
